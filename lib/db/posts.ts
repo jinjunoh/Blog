@@ -51,6 +51,7 @@ export async function getPublishedPosts(supabase: SupabaseClient): Promise<Post[
     .select('*')
     .eq('status', 'published')
     .eq('is_public', true)
+    .order('is_pinned', { ascending: false })
     .order('published_at', { ascending: false })
 
   if (error) throw error

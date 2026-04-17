@@ -9,19 +9,24 @@ interface PostCardProps {
 
 export default function PostCard({ post, admin = false }: PostCardProps) {
   const date = post.published_at ?? post.updated_at
+  const href = admin ? `/admin/posts/${post.id}/edit` : `/posts/${post.slug}`
 
   return (
-    <article className="group border-b border-gray-100 py-5 last:border-0">
-      <div className="flex items-start justify-between gap-4">
+    // relative + group so the overlay link and hover styles work together
+    <article className="relative group border-b border-gray-100 py-5 last:border-0">
+      {/* Full-block clickable overlay */}
+      <Link href={href} className="absolute inset-0 z-0" aria-label={post.title} />
+
+      <div className="relative z-10 flex items-start justify-between gap-4 pointer-events-none">
         <div className="flex-1 min-w-0">
-          <Link
-            href={admin ? `/admin/posts/${post.id}/edit` : `/posts/${post.slug}`}
-            className="block"
-          >
-            <h2 className="text-lg font-semibold text-gray-900 group-hover:text-gray-600 transition-colors truncate">
+          <div className="flex items-center gap-1.5">
+            {post.is_pinned && (
+              <span className="text-gray-400 text-xs" title="Pinned">📌</span>
+            )}
+            <h2 className="text-lg font-semibold text-gray-900 group-hover:text-gray-500 transition-colors truncate">
               {post.title}
             </h2>
-          </Link>
+          </div>
           {post.excerpt && (
             <p className="mt-1 text-sm text-gray-500 line-clamp-2">{post.excerpt}</p>
           )}

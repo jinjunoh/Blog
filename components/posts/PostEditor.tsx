@@ -17,6 +17,7 @@ export default function PostEditor({ post }: PostEditorProps) {
   const [title, setTitle] = useState(post?.title ?? '')
   const [content, setContent] = useState(post?.content ?? '')
   const [isPublic, setIsPublic] = useState(post?.is_public ?? false)
+  const [isPinned, setIsPinned] = useState(post?.is_pinned ?? false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -29,7 +30,7 @@ export default function PostEditor({ post }: PostEditorProps) {
     setSaving(true)
 
     try {
-      const body = JSON.stringify({ title, content, status, is_public: isPublic })
+      const body = JSON.stringify({ title, content, status, is_public: isPublic, is_pinned: isPinned })
       const res = post
         ? await fetch(`/api/posts/${post.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body })
         : await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
@@ -88,15 +89,26 @@ export default function PostEditor({ post }: PostEditorProps) {
 
       {/* Controls */}
       <div className="flex items-center justify-between pt-2 flex-wrap gap-3">
-        <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={isPublic}
-            onChange={(e) => setIsPublic(e.target.checked)}
-            className="rounded border-gray-300"
-          />
-          Public (visible to everyone)
-        </label>
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            Public
+          </label>
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={isPinned}
+              onChange={(e) => setIsPinned(e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            Pin to top
+          </label>
+        </div>
 
         <div className="flex items-center gap-2">
           {post && (

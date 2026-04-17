@@ -21,7 +21,7 @@ export default function AdminSidebar() {
   return (
     <aside className="w-52 shrink-0 flex flex-col border-r border-gray-200 min-h-screen py-6 px-4">
       <Link href="/" className="text-lg font-bold text-gray-900 mb-8 block">
-        brain
+        JJ&apos;s Blog
       </Link>
 
       <nav className="flex flex-col gap-1 flex-1">
