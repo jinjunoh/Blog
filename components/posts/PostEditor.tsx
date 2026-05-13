@@ -18,6 +18,8 @@ export default function PostEditor({ post }: PostEditorProps) {
   const [content, setContent] = useState(post?.content ?? '')
   const [isPublic, setIsPublic] = useState(post?.is_public ?? false)
   const [isPinned, setIsPinned] = useState(post?.is_pinned ?? false)
+  const [tags, setTags] = useState<string[]>(post?.tags ?? [])
+  const [tagInput, setTagInput] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -30,7 +32,7 @@ export default function PostEditor({ post }: PostEditorProps) {
     setSaving(true)
 
     try {
-      const body = JSON.stringify({ title, content, status, is_public: isPublic, is_pinned: isPinned })
+      const body = JSON.stringify({ title, content, status, is_public: isPublic, is_pinned: isPinned, tags })
       const res = post
         ? await fetch(`/api/posts/${post.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body })
         : await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })
@@ -53,6 +55,17 @@ export default function PostEditor({ post }: PostEditorProps) {
     } finally {
       setSaving(false)
     }
+  }
+
+  function addTag() {
+    const tag = tagInput.trim().toLowerCase()
+    if (!tag || tags.includes(tag)) return
+    setTags([...tags, tag])
+    setTagInput('')
+  }
+
+  function removeTag(tag: string) {
+    setTags(tags.filter((t) => t !== tag))
   }
 
   async function handleDelete() {
@@ -134,6 +147,44 @@ export default function PostEditor({ post }: PostEditorProps) {
             {saving ? 'Saving…' : 'Publish'}
           </button>
         </div>
+      </div>
+
+      {/* Tags */}
+      <div className="flex flex-col gap-2 pt-1">
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Add a tag"
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addTag() } }}
+            className="text-sm border border-gray-200 rounded-md px-3 py-1.5 focus:outline-none focus:border-gray-900 w-40"
+          />
+          <button
+            type="button"
+            onClick={addTag}
+            className="text-sm px-3 py-1.5 rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50"
+          >
+            Add tag
+          </button>
+        </div>
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <span key={tag} className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-600">
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="text-gray-400 hover:text-gray-700 leading-none"
+                  aria-label={`Remove ${tag}`}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}

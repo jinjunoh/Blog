@@ -30,6 +30,15 @@ export default function PostCard({ post, admin = false }: PostCardProps) {
           {post.excerpt && (
             <p className="mt-1 text-sm text-gray-500 line-clamp-2">{post.excerpt}</p>
           )}
+          {post.tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {post.tags.map((tag) => (
+                <span key={tag} className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-500">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
           <p className="mt-2 text-xs text-gray-400">{formatDate(date)}</p>
         </div>
 

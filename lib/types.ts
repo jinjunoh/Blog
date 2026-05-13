@@ -9,6 +9,7 @@ export interface Post {
   status: PostStatus
   is_public: boolean
   is_pinned: boolean
+  tags: string[]
   published_at: string | null
   created_at: string
   updated_at: string
@@ -21,6 +22,7 @@ export interface CreatePostInput {
   status: PostStatus
   is_public: boolean
   is_pinned?: boolean
+  tags?: string[]
 }
 
 export interface UpdatePostInput {
@@ -30,4 +32,5 @@ export interface UpdatePostInput {
   status?: PostStatus
   is_public?: boolean
   is_pinned?: boolean
+  tags?: string[]
 }

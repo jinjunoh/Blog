@@ -19,7 +19,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
     const body = await request.json()
-    const { title, content, excerpt, status, is_public } = body
+    const { title, content, excerpt, status, is_public, is_pinned, tags } = body
 
     if (status && !['draft', 'published'].includes(status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
@@ -32,6 +32,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
       ...(excerpt !== undefined && { excerpt }),
       ...(status !== undefined && { status }),
       ...(is_public !== undefined && { is_public: Boolean(is_public) }),
+      ...(is_pinned !== undefined && { is_pinned: Boolean(is_pinned) }),
+      ...(tags !== undefined && { tags: Array.isArray(tags) ? tags : [] }),
     })
 
     return NextResponse.json(post)

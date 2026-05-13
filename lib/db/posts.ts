@@ -71,7 +71,7 @@ export async function createPost(
 
   const { data, error } = await supabase
     .from('posts')
-    .insert({ ...input, slug, excerpt })
+    .insert({ ...input, slug, excerpt, tags: input.tags ?? [] })
     .select()
     .single()
 
@@ -101,6 +101,7 @@ export async function updatePost(
   const payload: Record<string, unknown> = { ...input }
   if (slug) payload.slug = slug
   if (excerpt !== undefined) payload.excerpt = excerpt
+  if (input.tags !== undefined) payload.tags = input.tags
 
   const { data, error } = await supabase
     .from('posts')

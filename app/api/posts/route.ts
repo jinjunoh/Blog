@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, content, excerpt, status, is_public } = body
+    const { title, content, excerpt, status, is_public, is_pinned, tags } = body
 
     if (!title?.trim()) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
       excerpt: excerpt ?? undefined,
       status,
       is_public: Boolean(is_public),
+      is_pinned: Boolean(is_pinned),
+      tags: Array.isArray(tags) ? tags : [],
     })
 
     return NextResponse.json(post, { status: 201 })

@@ -54,9 +54,20 @@ export default async function PostPage({ params }: Props) {
         </Link>
         <article>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">{post.title}</h1>
-          {post.published_at && (
-            <p className="text-sm text-gray-400 mb-8">{formatDate(post.published_at)}</p>
-          )}
+          <div className="flex flex-wrap items-center gap-3 mb-8">
+            {post.published_at && (
+              <p className="text-sm text-gray-400">{formatDate(post.published_at)}</p>
+            )}
+            {post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {post.tags.map((tag) => (
+                  <span key={tag} className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-gray-500">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
           <MarkdownRenderer content={post.content} />
         </article>
       </main>
