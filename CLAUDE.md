@@ -44,5 +44,8 @@ This is a Next.js 14 (App Router) personal blog/notes app backed by Supabase.
 - `/admin/posts/new` — create post
 - `/admin/posts/[id]/edit` — edit post
 - `/api/posts` (GET/POST) and `/api/posts/[id]` (GET/PATCH/DELETE) — REST API used by admin UI
+- `/api/images` (POST) — uploads an image to Supabase Storage, returns `{ url }`. Protected by middleware (auth required).
 
 **Post model** (`lib/types.ts`): `status` (`draft | published`), `is_public` (controls public visibility), `is_pinned` (float-to-top on homepage). Slug is auto-generated from title via `lib/utils/slug.ts` (using `slugify`) and de-duped against existing slugs. Excerpt is auto-generated from content when publishing if not manually provided (`lib/utils/excerpt.ts`).
+
+**Image uploads** — handled via Supabase Storage bucket `post-images` (must be public). The editor toolbar has an image icon that opens a file picker; on upload the public URL is inserted as `![](url)` at the cursor. Removing the markdown from the editor removes the image from the post, but the file remains in Storage — there is no delete-on-removal cleanup (orphaned files are intentionally left in place).

@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = pathname.startsWith('/admin')
   const isProtectedApi =
     pathname.startsWith('/api/posts') ||
+    pathname.startsWith('/api/images') ||
     pathname === '/api/auth/logout'
 
   if (!user && isAdminRoute) {
@@ -54,6 +55,7 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/api/posts/:path*',
+    '/api/images',
     '/api/auth/logout',
   ],
 }

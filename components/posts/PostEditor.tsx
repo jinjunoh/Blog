@@ -2,15 +2,23 @@
 
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { Post, PostStatus } from '@/lib/types'
+import type { ICommand } from '@uiw/react-md-editor'
 
-// Must be dynamically imported — @uiw/react-md-editor uses window
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
 interface PostEditorProps {
   post?: Post
 }
+
+const imageUploadIcon = (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+    <circle cx="8.5" cy="8.5" r="1.5" />
+    <polyline points="21 15 16 10 5 21" />
+  </svg>
+)
 
 export default function PostEditor({ post }: PostEditorProps) {
   const router = useRouter()
@@ -21,7 +29,12 @@ export default function PostEditor({ post }: PostEditorProps) {
   const [tags, setTags] = useState<string[]>(post?.tags ?? [])
   const [tagInput, setTagInput] = useState('')
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const editorApiRef = useRef<any>(null)
+  const uploadingRef = useRef(false)
 
   async function save(status: PostStatus) {
     if (!title.trim()) {
@@ -44,7 +57,6 @@ export default function PostEditor({ post }: PostEditorProps) {
         return
       }
 
-      // Redirect to edit page after first create
       if (!post) {
         router.push(`/admin/posts/${data.id}/edit`)
       } else {
@@ -79,6 +91,51 @@ export default function PostEditor({ post }: PostEditorProps) {
     }
   }
 
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    uploadingRef.current = true
+    setUploading(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/images', { method: 'POST', body: formData })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error ?? 'Upload failed')
+        return
+      }
+
+      const markdown = `![](${data.url})`
+      if (editorApiRef.current) {
+        editorApiRef.current.replaceSelection(markdown)
+      } else {
+        setContent((prev) => (prev ? `${prev}\n\n${markdown}` : markdown))
+      }
+    } catch {
+      setError('Upload failed — please try again')
+    } finally {
+      uploadingRef.current = false
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const imageUploadCommand: ICommand = {
+    name: 'image-upload',
+    keyCommand: 'image-upload',
+    buttonProps: { 'aria-label': uploading ? 'Uploading…' : 'Upload image', title: 'Upload image' },
+    icon: imageUploadIcon,
+    execute: (_state, api) => {
+      if (uploadingRef.current) return
+      editorApiRef.current = api
+      fileInputRef.current?.click()
+    },
+  }
+
   return (
     <div className="flex flex-col gap-4">
       {/* Title */}
@@ -97,8 +154,18 @@ export default function PostEditor({ post }: PostEditorProps) {
           onChange={(val) => setContent(val ?? '')}
           height={500}
           preview="live"
+          extraCommands={[imageUploadCommand]}
         />
       </div>
+
+      {/* Hidden file input for image upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
 
       {/* Controls */}
       <div className="flex items-center justify-between pt-2 flex-wrap gap-3">
@@ -188,6 +255,7 @@ export default function PostEditor({ post }: PostEditorProps) {
       </div>
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+      {uploading && <p className="text-sm text-gray-500">Uploading image…</p>}
     </div>
   )
 }
